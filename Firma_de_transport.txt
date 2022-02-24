@@ -1,0 +1,244 @@
+drop table gestionare;
+ drop table vehicul;
+ drop table parcare;
+ drop table contract;
+ drop table factura;
+ drop table transport;
+ drop table angajat;
+ drop table furnizor;
+ drop table client;
+ drop table locatie;
+ 
+create table parcare (
+id_parcare decimal(4),
+oras varchar(20) NOT NULL,
+strada varchar(20) NOT NULL,
+capacitate decimal(4)
+);
+
+ALTER TABLE parcare
+ADD ( 
+	CONSTRAINT id_parc_pk Primary key (id_parcare),
+    CONSTRAINT oras_u UNIQUE (oras),
+    CONSTRAINT capacitate_c check(capacitate>0)
+    );
+
+insert into parcare 
+values ('1','Arad','Eclipsei','100');
+insert into parcare 
+values ('2','Oradea','Trei Brazi','200');
+insert into parcare 
+values ('3','Sibiu','Revolutiei','150');
+insert into parcare
+values('4','Sighisoara','Solstitiului','100');
+
+
+create table vehicul (
+id_vehicul decimal(4),
+km decimal(6) not null ,
+capacitate_maxima decimal(4),
+id_parcare decimal(4) not null
+);
+
+ALTER TABLE vehicul ADD
+( CONSTRAINT id_veh_pk Primary key (id_vehicul),
+  CONSTRAINT id_parc_fk FOREIGN KEY (id_parcare) 
+	REFERENCES parcare(id_parcare) ON DELETE CASCADE,
+  CONSTRAINT capacitate_max_c CHECK (capacitate_maxima>0),
+  CONSTRAINT km_c CHECK (km>0)
+);
+
+insert into vehicul 
+values ('1',200000,3500,2);
+insert into vehicul 
+values ('2',250000,3300,1);
+insert into vehicul 
+values ('3',220000,3500,3);
+
+
+create table angajat (
+cnp_angajat varchar(15),
+tip_angajat varchar(20) not null ,
+nume varchar(20) not null,
+prenume varchar(20) not null
+);
+
+ALTER TABLE angajat ADD
+(
+	CONSTRAINT cnp_angajat_pk PRIMARY KEY (cnp_angajat),
+    CONSTRAINT cnp_anagajat_c check (length(cnp_angajat)=13),
+    CONSTRAINT nume_u UNIQUE (nume)
+);
+
+
+insert into angajat
+values ('6220102016972', 'sofer', 'Ionescu', 'Ionela');
+insert into angajat
+values ('5220102015514', 'sofer', 'Aramescu', 'Marian');
+insert into angajat
+values ('5220102019521', 'dispecer', 'Popescu', 'Mihai');
+insert into angajat 
+values('2881105277255','sofer','Irimia','Teodor');
+insert into angajat 
+values('1890518115943','manipulant','Matache','Marian');
+
+
+create table gestionare (
+id_gestionare decimal(4),
+id_vehicul decimal(4) not null,
+cnp_angajat varchar(15)
+);
+
+ALTER TABLE gestionare ADD 
+(
+	CONSTRAINT id_gestionare_pk PRIMARY KEY (id_gestionare),
+    CONSTRAINT id_vehicul_fk FOREIGN KEY (id_vehicul) references vehicul(id_vehicul) ON DELETE CASCADE,
+    CONSTRAINT cnp_angajat_fk FOREIGN KEY (cnp_angajat) references angajat(cnp_angajat) ON DELETE SET NULL
+);
+
+insert into gestionare
+values ('1', '2', '6220102016972');
+insert into gestionare
+values ('2','1', '5220102015514');
+insert into gestionare
+values ('3','3', '2881105277255');
+
+
+create table furnizor(
+id_furnizor decimal(4),
+nume varchar(20) not null,
+tip_furnizor varchar(20) not null ,
+oras varchar(20) not null 
+);
+
+ALTER TABLE furnizor ADD 
+( 
+ 	CONSTRAINT id_furnizor_pk PRIMARY KEY (id_furnizor),
+    CONSTRAINT nume_fur_u UNIQUE (nume)
+);
+
+insert into furnizor 
+values('1', 'emag', 'produse', 'Bucuresti');
+insert into furnizor 
+values('2', 'Elefant', 'parfumuri', 'Iasi');
+insert into furnizor 
+values('3', 'CCC', 'incaltaminte', 'Oradea');
+insert into furnizor 
+values('4', 'Dedeman', 'produse', 'Ilfov');
+
+
+create table transport (
+id_transport decimal(4),
+tip_transport varchar(20) not null ,
+cantitate_marfa decimal(4) not null,
+cnp_angajat varchar(15) not null
+);
+ 
+ALTER TABLE transport ADD 
+( 
+ 	CONSTRAINT id_transport_pk PRIMARY KEY (id_transport),
+    CONSTRAINT cnp_angajat_v_fk FOREIGN KEY (cnp_angajat) references angajat(cnp_angajat) ON DELETE CASCADE,
+    CONSTRAINT cantitate_marfa_C CHECK (cantitate_marfa>0)
+);
+
+insert into transport
+values ('1', 'national', '2500', '5220102015514');
+insert into transport
+values ('2', 'national', '2200', '5220102019521');
+insert into transport
+values ('3', 'international', '3200', '6220102016972');
+
+
+create table contract(
+	id_contract decimal(4), 
+    id_furnizor decimal(4),
+    id_transport decimal(4) not null
+);
+
+ALTER TABLE contract ADD 
+(
+	CONSTRAINT id_contract_pk PRIMARY KEY (id_contract),
+    CONSTRAINT id_furnizor_fk FOREIGN KEY (id_furnizor) references furnizor(id_furnizor) ON DELETE SET NULL ,
+    CONSTRAINT id_transport_fk FOREIGN KEY (id_transport) references transport(id_transport) ON DELETE CASCADE 
+);
+
+ insert into contract
+ values('1','2','1');
+ insert into contract
+ values('2','1','3');
+insert into contract
+ values('3','4','2');
+ 
+ 
+create table locatie 
+(
+	id_locatie decimal(4),
+    tara varchar(20) not null,
+    oras varchar(20) not null,
+    cod_postal varchar(6) not null,
+    strada varchar(20) not null  
+);
+
+ALTER TABLE locatie ADD 
+( 
+ 	CONSTRAINT id_locatie_pk PRIMARY KEY (id_locatie),
+ 	CONSTRAINT cod_postal_u UNIQUE (cod_postal)
+);
+ insert into locatie 
+ values ('1','Romania','Suceava','012546','Zarnesti');
+ insert into locatie 
+ values ('2','Romania','Brasov','112532','Soldanului');
+ insert into locatie 
+ values ('3','Romania','Constanta','987512','Soarelui');
+ insert into locatie 
+ values ('4','Romania','Botosani','717316','Marin');
+ insert into locatie
+ values('5','Romania','Mures','246255','Brancoveanu');
+ 
+create table client
+(
+	id_client decimal(4),
+    nume varchar(30) not null,
+    prenume varchar(30) not null ,
+    nr_telefon varchar(10) not null,
+    id_locatie decimal(4) not null
+);
+
+ALTER TABLE client ADD 
+(
+	CONSTRAINT id_client_pk PRIMARY KEY (id_client),
+    CONSTRAINT id_locatie_fk FOREIGN KEY (id_locatie) references locatie(id_locatie) ON DELETE CASCADE,
+    CONSTRAINT nr_telefon_u UNIQUE (nr_telefon) ,
+    CONSTRAINT nr_telefon_C CHECK (length(nr_telefon) >= 10)
+);
+
+insert into client 
+values('1', 'Popescu','Iosif','0743265845','2');
+insert into client 
+values('2', 'Smith','Anna','0759845825','1');
+insert into client 
+values('3', 'John','David','0722358945','3');
+insert into client 
+values('4', 'Mary','Ingrid','0751855852','5');
+
+create table factura
+(
+	id_factura decimal(4),
+    data_emitere date not null,
+    id_transport decimal(4),
+    id_client decimal(4) not null
+);
+
+ALTER TABLE factura ADD 
+(
+	CONSTRAINT id_factura_pk PRIMARY KEY (id_factura),
+    CONSTRAINT id_transport_fact_fk FOREIGN KEY (id_transport) references transport(id_transport) ON DELETE SET NULL,
+    CONSTRAINT id_client_fk FOREIGN KEY (id_client) references client(id_client) ON DELETE CASCADE
+);
+
+insert into factura
+values('1', '2021-07-21', '2', '1');
+insert into factura
+values('2', '2021-11-11', '3', '2');
+insert into factura
+values('3', '2021-09-09', '1', '3');
